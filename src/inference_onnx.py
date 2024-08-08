@@ -1,9 +1,12 @@
+from io import BytesIO
 import onnxruntime as ort
 import torch
-import numpy as np
 from torchvision import transforms
 from PIL import Image
 import os
+from scipy.special import softmax
+from typing import Any, Dict, Tuple
+import numpy as np
 
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
@@ -11,26 +14,26 @@ transform = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-def preprocess_image(image_path):
-    image = Image.open(image_path).convert('RGB')
-    image = transform(image)
-    image = image.unsqueeze(0)
-    return image.numpy()
+class ONNXPrediction:
+    def __init__(self, onnx_path: str, class_mapping: Dict[int, str]) -> None:
+        self.transform = transform
+        self.session = ort.InferenceSession(onnx_path)
+        input_info = self.session.get_inputs()[0]
+        output_info = self.session.get_outputs()[0]
+        self.input_name = input_info.name
+        self.output_name = output_info.name
+        self.class_mapping = class_mapping
 
-onnx_path = 'leaf_model.onnx'
-session = ort.InferenceSession(onnx_path)
-input_name = session.get_inputs()[0].name
-output_name = session.get_outputs()[0].name
+    def preprocess_image(self, image: bytes) -> np.ndarray:
+        image = Image.open(BytesIO(image))
+        image = self.transform(image)
+        return np.expand_dims(image.numpy(), axis=0)
 
-image_path = 'path/to/images'
-input_data = preprocess_image(image_path=image_path)
-
-outputs = session.run([output_name], {input_name: input_data})
-predicted_idx = np.argmax(outputs[0], axis=1)[0]
-
-data_dir = 'dataset/PlantVillage'
-class_names = sorted(os.listdir(data_dir))
-predicted_class = class_names[predicted_idx]
-
-print(f"Predicted Idx: {predicted_idx}")
-print(f"Predicted Class: {predicted_class}")
+    def prediction(self, image: bytes) -> Tuple[str, float, int]:
+        input_data = self.preprocess_image(image)
+        output = self.session.run([self.output_name], {self.input_name: input_data})
+        probabilites = softmax(output[0], axis=1)
+        predicted_class_idx = int(np.argmax(probabilites))
+        predicted_class_prob = float(probabilites[0][predicted_class_idx])
+        predicted_class_name = self.class_mapping.get(predicted_class_idx, "Unknown")
+        return predicted_class_idx, predicted_class_prob, predicted_class_name
