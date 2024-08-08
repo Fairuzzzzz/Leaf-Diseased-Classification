@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+*.pyo
+
+checkpoints/
+*.pt
+*.ckpt
+
+lightning_logs/

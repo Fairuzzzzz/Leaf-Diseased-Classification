@@ -1,14 +1,16 @@
 import torch
+import torch.nn as nn
 import pytorch_lightning as pl
 import torchvision.models as models
 from torchmetrics.functional import accuracy
 
 class LeafModel(pl.LightningModule):
     def __init__(self, num_classes):
-        super(LeafModel).__init__()
+        super().__init__()
         self.model = models.resnet18(pretrained=True)
         self.model.fc = nn.Linear(self.model.fc.in_features, num_classes)
         self.criterion = nn.CrossEntropyLoss()
+        self.num_classes = num_classes
 
     def forward(self, x):
         return self.model(x)
@@ -17,9 +19,9 @@ class LeafModel(pl.LightningModule):
         images, labels = batch
         outputs = self(images)
         loss = self.criterion(outputs, labels)
-        acc = accuracy(outputs, labels)
-        self.log('Train loss', loss)
-        self.log('Train Acc', acc)
+        acc = accuracy(outputs, labels, task='multiclass', num_classes=self.num_classes)
+        self.log('train_loss', loss)
+        self.log('train_acc', acc)
 
         return loss
 
@@ -27,12 +29,12 @@ class LeafModel(pl.LightningModule):
         images, labels = batch
         outputs = self(images)
         loss = self.criterion(outputs, labels)
-        acc = accuracy(outputs, labels)
-        self.log('Val Loss', loss)
-        self.log('Val Acc', acc)
+        acc = accuracy(outputs, labels, task='multiclass', num_classes=self.num_classes)
+        self.log('val_loss', loss)
+        self.log('val_acc', acc)
 
         return loss
 
-    def configure_optimizer(self):
+    def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=0.001)
         return optimizer
