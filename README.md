@@ -23,6 +23,9 @@ The model is fine-tuned to recognize 15 different classes of leaves.
 - torchmetrics==0.11.4
 - tqdm==4.65.0
 - Pillow==9.3.0
+- onnx==1.16.2
+- onnxruntime==1.18.1
+- onnxscript==0.1.*
 
 ### Installation
 1. Clone the repository

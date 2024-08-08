@@ -22,7 +22,7 @@ session = ort.InferenceSession(onnx_path)
 input_name = session.get_inputs()[0].name
 output_name = session.get_outputs()[0].name
 
-image_path = 'Tomato_Leaf.jpg'
+image_path = 'path/to/images'
 input_data = preprocess_image(image_path=image_path)
 
 outputs = session.run([output_name], {input_name: input_data})
