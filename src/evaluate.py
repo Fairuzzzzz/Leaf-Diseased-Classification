@@ -10,7 +10,7 @@ _, val_loader = get_dataloader(data_dir=data_dir, batch_size=batch_size)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-model = LeafModel.load_from_checkpoint('checkpoints/leaf-model-epoch=15-val_loss=0.07.ckpt', num_classes=num_classes)
+model = LeafModel.load_from_checkpoint('path/to/model', num_classes=num_classes)
 model.to(device)
 model.eval()
 

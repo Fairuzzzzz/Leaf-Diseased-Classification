@@ -15,7 +15,7 @@ model = LeafModel(num_classes=num_classes)
 
 checkpoint_callback = ModelCheckpoint(
     monitor='val_loss',
-    dirpath='checkpoints/',
+    dirpath='checkpoints/path',
     filename='leaf-model-{epoch:02d}-{val_loss:.2f}',
     save_top_k=3,
     mode='min'

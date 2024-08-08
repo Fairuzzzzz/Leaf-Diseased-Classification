@@ -11,7 +11,7 @@ transform = transforms.Compose([
 ])
 
 num_classes = 15
-checkpoint_path = 'checkpoints/leaf-model-epoch=15-val_loss=0.07.ckpt'
+checkpoint_path = 'path/to/model'
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 data_dir = 'dataset/PlantVillage'
@@ -27,7 +27,7 @@ def preprocess_image(image_path):
     image = image.unsqueeze(0)
     return image
 
-image_path = 'Tomato_Leaf.jpg'
+image_path = 'path/to/image'
 image = preprocess_image(image_path=image_path).to(device)
 
 with torch.no_grad():
